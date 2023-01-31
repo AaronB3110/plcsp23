@@ -2,7 +2,7 @@
 
 1. Clone the repo
    ```sh
-   git clone https://github.com/AaronB3110/edu.ufl.cise.plcsp23.git
+   git clone https://github.com/AaronB3110/plcsp23.git
    ```
 2. Navigate inside the repo.
    ```sh
