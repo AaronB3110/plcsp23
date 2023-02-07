@@ -13,6 +13,8 @@ public class Token implements IToken {
         this.line = line;
         this.column = column;
         this.loc = new SourceLocation(line, column);
+
+        System.out.println("hey i pushed");
     }
 
     @Override
@@ -30,5 +32,5 @@ public class Token implements IToken {
         // TODO Auto-generated method stub
         return null;
     }
-    
+
 }
