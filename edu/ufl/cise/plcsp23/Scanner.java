@@ -43,81 +43,116 @@ public class Scanner implements IScanner {
 
         while (true) {
             switch (state) {
-                case START:
+                case START -> {
                     tokenStart = pos;
                     switch(ch){
                         case 0 -> {
                             return new Token(IToken.Kind.EOF, tokenStart, 0, inputChars);
                         }
-                        case ' ', '\t','\r','\n' -> nextChar();
-
+                        case ' ', '\n', '\t', '\r' -> {
+                            nextChar();
+                        }
                         case '.' -> {
+                            nextChar();
                             return new Token(IToken.Kind.DOT, tokenStart, 1, inputChars);
                         }
                         case ',' -> {
+                            nextChar();
                             return new Token(IToken.Kind.COMMA, tokenStart, 1, inputChars);
                         }
                         case '?' -> {
+                            nextChar();
                             return new Token(IToken.Kind.QUESTION, tokenStart, 1, inputChars);
                         }
                         case ':' -> {
+                            nextChar();
                             return new Token(IToken.Kind.COLON, tokenStart, 1, inputChars);
                         }
                         case '(' -> {
+                            nextChar();
                             return new Token(IToken.Kind.LPAREN, tokenStart, 1, inputChars);
                         }
                         case ')' -> {
+                            nextChar();
                             return new Token(IToken.Kind.RPAREN, tokenStart, 1, inputChars);
                         }
                         case '<' -> {
+                            nextChar();
                             return new Token(IToken.Kind.LT, tokenStart, 1, inputChars);
                         }
                         case '>' -> {
+                            nextChar();
                             return new Token(IToken.Kind.GT, tokenStart, 1, inputChars);
                         }
                         case '[' -> {
+                            nextChar();
                             return new Token(IToken.Kind.LSQUARE, tokenStart, 1, inputChars);
                         }
                         case ']' -> {
+                            nextChar();
                             return new Token(IToken.Kind.RSQUARE, tokenStart, 1, inputChars);
                         }
                         case '{' -> {
+                            nextChar();
                             return new Token(IToken.Kind.LCURLY, tokenStart, 1, inputChars);
                         }
                         case '}' -> {
+                            nextChar();
                             return new Token(IToken.Kind.RCURLY, tokenStart, 1, inputChars);
                         }
                         case '=' -> {
+                            nextChar();
                             return new Token(IToken.Kind.ASSIGN, tokenStart, 1, inputChars);
                         }
                         case '!' -> {
+                            nextChar();
                             return new Token(IToken.Kind.BANG, tokenStart, 1, inputChars);
                         }
                         case '&' -> {
+                            nextChar();
                             return new Token(IToken.Kind.BITAND, tokenStart, 1, inputChars);
                         }
                         case '|' -> {
+                            nextChar();
                             return new Token(IToken.Kind.BITOR, tokenStart, 1, inputChars);
                         }
                         case '+' -> {
+                            nextChar();
                             return new Token(IToken.Kind.PLUS, tokenStart, 1, inputChars);
                         }
                         case '-' -> {
+                            nextChar();
                             return new Token(IToken.Kind.QUESTION, tokenStart, 1, inputChars);
                         }
                         case '*' -> {
+                            nextChar();
                             return new Token(IToken.Kind.TIMES, tokenStart, 1, inputChars);
                         }
                         case '/' -> {
+                            nextChar();
                             return new Token(IToken.Kind.DIV, tokenStart, 1, inputChars);
                         }
                         case '%' -> {
+                            nextChar();
                             return new Token(IToken.Kind.MOD, tokenStart, 1, inputChars);
                         }
+                        default -> {
+                            throw new UnsupportedOperationException("Not implemented yet");
+                        }
+                    }  
+                }
+                case NUM_LIT -> {
+                    switch(ch){
+                        
                     }
-                    break;
+                }
+                case LET_IDENT -> {
+                    switch(ch){
+
+                    }
+                }
+                    
             }
-            nextChar();
         }
     }
 
@@ -131,7 +166,7 @@ public class Scanner implements IScanner {
 		EXP, // ** 
     */
 
-    private void nextChar() {
+    void nextChar() {
         pos++;
         ch = inputChars[pos];
     }
