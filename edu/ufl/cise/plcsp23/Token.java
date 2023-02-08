@@ -16,7 +16,8 @@ public class Token implements IToken {
 
     @Override
     public SourceLocation getSourceLocation() {
-        return loc;
+
+        return new SourceLocation(pos,length);
     }
 
     @Override
@@ -27,7 +28,7 @@ public class Token implements IToken {
     @Override
     public String getTokenString() {
         // TODO Auto-generated method stub
-        return null;
+        return new String(source, pos, length);
     }
 
 }
