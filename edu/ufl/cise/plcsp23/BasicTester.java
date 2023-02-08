@@ -1,7 +1,6 @@
 package edu.ufl.cise.plcsp23;
 import static org.junit.jupiter.api.Assertions.*;
 
-import org.hamcrest.core.Is;
 import org.junit.jupiter.api.Test;
 import edu.ufl.cise.plcsp23.IToken.Kind;
 

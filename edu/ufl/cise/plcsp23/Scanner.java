@@ -27,7 +27,8 @@ public class Scanner implements IScanner {
         LESS_EQ,
         AND,
         OR,
-        EXPONENT
+        EXPONENT,
+        QUOTE,
     }
 
     
@@ -162,6 +163,10 @@ public class Scanner implements IScanner {
                         case '%' -> {
                             nextChar();
                             return new Token(IToken.Kind.MOD, tokenStart, 1, inputChars);
+                        }
+                        case '"' -> {
+                            state = state.QUOTE;
+                            nextChar();              
                         }
                         default -> {
                             throw new UnsupportedOperationException("Not implemented yet");
