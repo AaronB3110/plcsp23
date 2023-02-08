@@ -2,19 +2,16 @@ package edu.ufl.cise.plcsp23;
 
 public class Token implements IToken {
     final Kind kind;
-    final String input;
-    final int line;
-    final int column;
-    SourceLocation loc;
+    final int pos;
+    final int length;
+    final char[] source;
 
-    public Token(Kind kind, String input, int line, int column){
+    public Token(Kind kind, int pos, int length, char[] source){
+        super();
         this.kind = kind;
-        this.input = input;
-        this.line = line;
-        this.column = column;
-        this.loc = new SourceLocation(line, column);
-
-        System.out.println("hey i pushed");
+        this.pos = pos;
+        this.length = length;
+        this.source = source;
     }
 
     @Override
