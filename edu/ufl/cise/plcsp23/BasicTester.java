@@ -107,4 +107,21 @@ public class BasicTester {
         checkEOF(scanner.next());
         
     }
+
+    @Test
+    void checkNumLit() throws LexicalException {
+        String input = """
+                123
+                22
+                45
+                09
+                """;
+        final IScanner scanner = CompilerComponentFactory.makeScanner(input);
+        checkToken(Kind.NUM_LIT, scanner.next());
+        checkToken(Kind.NUM_LIT, scanner.next());
+        checkToken(Kind.NUM_LIT, scanner.next());
+        checkToken(Kind.NUM_LIT, scanner.next());
+        checkToken(Kind.NUM_LIT, scanner.next());
+        checkEOF(scanner.next());
+    }
 }
