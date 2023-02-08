@@ -94,7 +94,7 @@ class TestScanner_starter {
 		checkToken(Kind.EOF, t);
 	}
 
-
+	 
 	@Test
 	void emptyProg() throws LexicalException {
 		String input = "";
