@@ -14,6 +14,7 @@ public class Scanner implements IScanner {
     
     int pos;
     char ch;
+    String value = ""; // Used to hold the value of NUMLITS (MAYBE STRING LITS TOO?)
 
     private enum State{
         START,
@@ -68,12 +69,13 @@ public class Scanner implements IScanner {
         while (true) {
             switch (state) {
                 case START -> {
+                    value = "";
                     tokenStart = pos;
                     switch(ch){
                         case 0 -> {
                             return new Token(IToken.Kind.EOF, tokenStart, 0, inputChars);
                         }
-                        case ' ', '\n', '\t', '\r' -> {
+                        case ' ', '\n', '\t', '\r', '\f'-> {
                             nextChar();
                         }
                         case '.' -> {
@@ -168,8 +170,17 @@ public class Scanner implements IScanner {
                             state = state.QUOTE;
                             nextChar();              
                         }
+                        case '1','2','3','4','5','6','7','8','9' -> {
+                            state = State.NUM_LIT;
+                            value += ch;
+                            nextChar();
+                        }
+                        case '0' -> {
+                            nextChar();
+                            return new NumLitToken(0, tokenStart, pos - tokenStart, inputChars);
+                        }
                         default -> {
-                            throw new UnsupportedOperationException("Not implemented yet");
+                            throw new LexicalException("Character not implemented!");
                         }
                     }  
                 }
@@ -247,7 +258,20 @@ public class Scanner implements IScanner {
                 }
                 case NUM_LIT -> {
                     switch(ch){
-
+                        case '0','1','2','3','4','5','6','7','8','9' -> {
+                            state = State.NUM_LIT;
+                            value += ch;
+                            nextChar();
+                        }
+                        default -> {
+                            //exception if large number
+                            try {
+                                Integer.parseInt(value);
+                            } catch (NumberFormatException e) {
+                                throw new LexicalException("Integer not valid");
+                            }
+                            return new NumLitToken(Integer.parseInt(value), tokenStart, pos - tokenStart, inputChars);  
+                        }
                     }
                 }
                 case LET_IDENT -> {

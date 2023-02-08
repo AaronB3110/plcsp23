@@ -1,28 +1,14 @@
 package edu.ufl.cise.plcsp23;
 
-public class NumLitToken implements INumLitToken {
-    private int value;
+public class NumLitToken extends Token implements INumLitToken {
+    final int val;
 
-    @Override
+    public NumLitToken(int val, int pos, int length, char[] inputChars){
+        super(Kind.NUM_LIT, pos, length, inputChars);
+        this.val = val;
+    }
+
     public int getValue(){
-        return this.value;
-    }
-
-    @Override
-    public SourceLocation getSourceLocation() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Kind getKind() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getTokenString() {
-        // TODO Auto-generated method stub
-        return null;
+        return val;
     }
 }
