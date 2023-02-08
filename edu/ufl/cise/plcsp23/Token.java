@@ -38,7 +38,7 @@ public class Token implements IToken {
     @Override
     public String getTokenString() {
         // TODO Auto-generated method stub
-        return null;
+        return new String(source, pos, length);
     }
-    
+
 }
