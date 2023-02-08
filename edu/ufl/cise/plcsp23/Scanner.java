@@ -11,7 +11,7 @@ public class Scanner implements IScanner {
     final String input;
     final char[] inputChars;
     private final List<Token> tokens = new ArrayList<>();
-    
+
     int pos;
     char ch;
 
@@ -30,7 +30,7 @@ public class Scanner implements IScanner {
         EXPONENT
     }
 
-    
+
 
     // Constructor
     public Scanner(String input){
@@ -192,7 +192,7 @@ public class Scanner implements IScanner {
                         default -> {
                             throw new UnsupportedOperationException("Not implemented yet");
                         }
-                    }  
+                    }
                 }
                 case HAVE_EQ -> {
                     if(ch == '='){
@@ -268,10 +268,15 @@ public class Scanner implements IScanner {
                 }
                 case NUM_LIT -> {
                     switch(ch){
-                        case '1','2','3','4','5','6','7','8','9' -> {
+                        case '0','1','2','3','4','5','6','7','8','9' -> {
                             state = State.NUM_LIT;
                             nextChar();
                         }
+                        default -> {
+                            return new Token(Kind.NUM_LIT,tokenStart, pos-tokenStart,inputChars);
+                        }
+
+
                     }
                 }
                 case LET_IDENT -> {
@@ -286,5 +291,5 @@ public class Scanner implements IScanner {
             }
         }
     }
-    
+
 }
