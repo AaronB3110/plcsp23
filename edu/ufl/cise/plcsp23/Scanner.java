@@ -3,6 +3,7 @@ package edu.ufl.cise.plcsp23;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.ToLongBiFunction;
 import java.util.HashMap;
 
 import edu.ufl.cise.plcsp23.IToken.Kind;
@@ -13,6 +14,8 @@ public class Scanner implements IScanner {
     private final List<Token> tokens = new ArrayList<>();
 
     int pos;
+    int line =1;
+    int col = 0;
     char ch;
     String value = ""; // Used to hold the value of NUMLITS (MAYBE STRING LITS TOO?)
 
@@ -30,6 +33,7 @@ public class Scanner implements IScanner {
         OR,
         EXPONENT,
         QUOTE,
+        stringLit
     }
 
 
@@ -46,6 +50,7 @@ public class Scanner implements IScanner {
     // Helper function for next char
     void nextChar() {
         pos++;
+        col++;
         ch = inputChars[pos];
     }
 
@@ -87,7 +92,6 @@ public class Scanner implements IScanner {
         tokens.add(token);
         return token;
     }
-
     private Token scanToken() throws LexicalException {
         State state = State.START;
         int tokenStart = -1;
@@ -102,7 +106,14 @@ public class Scanner implements IScanner {
                             return new Token(IToken.Kind.EOF, tokenStart, 0, inputChars);
                         }
                         case ' ', '\n', '\t', '\r', '\f'-> {
-                            nextChar();
+                            if(ch == '\n'){
+                                line++;
+                                col = 0;
+                                nextChar();
+                            }
+                            else{
+                                nextChar();
+                            }
                         }
                         case '.' -> {
                             nextChar();
@@ -192,8 +203,8 @@ public class Scanner implements IScanner {
                             nextChar();
                             return new Token(IToken.Kind.MOD, tokenStart, 1, inputChars);
                         }
-                        case '"' -> {
-                            state = state.QUOTE;
+                        case '\"' -> {//"\"
+                            state = state.stringLit;
                             nextChar();              
                         }
                         case '1','2','3','4','5','6','7','8','9' -> {
@@ -288,6 +299,7 @@ public class Scanner implements IScanner {
                             state = State.NUM_LIT;
                             value += ch;
                             nextChar();
+            
                         }
                         default -> {
                             //exception if large number
@@ -309,8 +321,45 @@ public class Scanner implements IScanner {
 
                     }
                 }
+                case stringLit ->{
+                    switch(ch){
+                        case '\\' ->{
+                        state = State.stringLit;
+                        nextChar();
+                        if(ch == 'b' ||ch == 'n' || ch =='r' || ch =='"'|| ch == '\\'|| ch == 't'){
+                            nextChar();
+                        
+                        }
+                            else{
+                                throw new LexicalException("String not valid");
+                        
+                                //throw error
+                            }
+                        
+                        }// black sslash indicatting escape sequence.
+                        case '\"' ->{ // quotes within qoutes  end create a new token 
+                        state = State.START;
+                        nextChar();
+
+                        /*
+                         * FIX:
+                         * return inputChars ONLY UP TO THIS POSITION, otherwise it returns the entire input
+                         */
+        
+                        return new StringLitToken(tokenStart, pos-tokenStart,line,col, inputChars) ; 
+                        }
+                        case '\n', '\r'  ->{// not allowed thows another wrror // 
+                            //could this be a defult? 
+                            //throw error
+                            throw new LexicalException("String not valid");
+                    }
+                    default ->{
+                        state = State.stringLit;// maybe this is redundant
+                        nextChar();
+                    }
+                }
+              }
             }
         }
     }
-
 }

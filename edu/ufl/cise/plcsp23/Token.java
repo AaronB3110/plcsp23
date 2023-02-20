@@ -17,13 +17,13 @@ public class Token implements IToken {
         this.source = source;
     }
 
-    public Token(Kind kind, String input, int line, int column){
-        super();
-        this.kind = kind;
-        this.input = input;
-        this.length = line;
-        this.column = column;
-    }
+    // public Token(Kind kind, String input, int line, int column){
+    //     super();
+    //     this.kind = kind;
+    //     this.input = input;
+    //     this.length = line;
+    //     this.column = column;
+    // }
 
     @Override
     public SourceLocation getSourceLocation() {
