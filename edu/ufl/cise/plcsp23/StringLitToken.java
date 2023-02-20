@@ -3,9 +3,13 @@ package edu.ufl.cise.plcsp23;
 import org.junit.internal.builders.NullBuilder;
 
 public class StringLitToken extends Token implements IStringLitToken  {
+    private int col;
+    private int line;
 
     public StringLitToken(int pos, int length, int line, int col, char[] source){
         super(Kind.STRING_LIT, pos, length, source);
+        this.col = col;
+        this.line = line;
     
     }
 
@@ -20,7 +24,46 @@ String value ="";
          */
 
          for(int i = pos+1; i<length-1; i++){
-            value = value + source[i];
+            if(source[i] == '\\'){
+                if(source[i+1] == 'b'){
+                    value = value + '\b';
+                    i++;
+                }
+                else if(source[i+1] == 't'){
+                    value = value + '\t';
+                    i++;
+                }
+                else if(source[i+1] == 'n'){
+                    value = value + '\n';
+                    i++;
+                }
+                else if(source[i+1] == 'f'){
+                    value = value + '\f';
+                    i++;
+                }
+                else if(source[i+1] == 'r'){
+                    value = value + '\r';
+                    i++;
+                }
+                else if(source[i+1] == '\"'){
+                    value = value + '\"';
+                    i++;
+                }
+                else if(source[i+1] == '\''){
+                    value = value + '\'';
+                    i++;
+                }
+                else if(source[i+1] == '\\'){
+                    value = value + '\\';
+                    i++;
+                }
+                else{
+                    value = value + source[i];
+                }
+            }
+            else{
+                value = value + source[i];
+            }
          }
         // String value = String.valueOf(source);
         // value = value.substring(pos+1, (pos+1)+(length-2));
@@ -31,7 +74,7 @@ String value ="";
     @Override
     public SourceLocation getSourceLocation() {
         // TODO Auto-generated method stub
-        return new SourceLocation(1,1);
+        return new SourceLocation(line, col);
     }
 
     @Override
