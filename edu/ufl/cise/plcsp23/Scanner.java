@@ -14,15 +14,15 @@ public class Scanner implements IScanner {
     private final List<Token> tokens = new ArrayList<>();
 
     int pos;
-    int line =1;
-    int col = 0;
+    int line = 1;
+    int col = 1;
     char ch;
     String value = ""; // Used to hold the value of NUMLITS (MAYBE STRING LITS TOO?)
 
     private enum State{
         START,
         NUM_LIT,
-        LET_IDENT,
+        IDENT,
         HAVE_EQ,
         LESS,
         GREATER,
@@ -33,7 +33,7 @@ public class Scanner implements IScanner {
         OR,
         EXPONENT,
         QUOTE,
-        stringLit
+        STRING_LIT
     }
 
 
@@ -108,8 +108,9 @@ public class Scanner implements IScanner {
                         case ' ', '\n', '\t', '\r', '\f'-> {
                             if(ch == '\n'){
                                 line++;
-                                col = 0;
-                                nextChar();
+                                col = 1;
+                                pos++;
+                                ch = inputChars[pos];
                             }
                             else{
                                 nextChar();
@@ -204,7 +205,7 @@ public class Scanner implements IScanner {
                             return new Token(IToken.Kind.MOD, tokenStart, 1, inputChars);
                         }
                         case '\"' -> {//"\"
-                            state = state.stringLit;
+                            state = state.STRING_LIT;
                             nextChar();              
                         }
                         case '1','2','3','4','5','6','7','8','9' -> {
@@ -212,12 +213,25 @@ public class Scanner implements IScanner {
                             value += ch;
                             nextChar();
                         }
+                        case '~' -> {
+                            line++;
+                            col = 1;
+                            pos = 1;
+                            ch = inputChars[pos];
+                        }
                         case '0' -> {
                             nextChar();
                             return new NumLitToken(0, tokenStart, pos - tokenStart, inputChars);
                         }
                         default -> {
-                            throw new LexicalException("Character not implemented!");
+                            if(Character.isJavaIdentifierPart(ch)){
+                                state = State.IDENT;
+                                value += ch;
+                                nextChar();
+                            } else {
+                                throw new LexicalException("Character not implemented!");
+                            }
+                            
                         }
                     }
                 }
@@ -260,7 +274,7 @@ public class Scanner implements IScanner {
                         nextChar();
                         return new Token(Kind.EXCHANGE, tokenStart, 3, inputChars);
                     }else {
-                        // throw exception
+                        throw new LexicalException("Incorrect character");
                     }
                 }
                 case AND -> {
@@ -299,7 +313,6 @@ public class Scanner implements IScanner {
                             state = State.NUM_LIT;
                             value += ch;
                             nextChar();
-            
                         }
                         default -> {
                             //exception if large number
@@ -312,19 +325,24 @@ public class Scanner implements IScanner {
                         }
                     }
                 }
-                case LET_IDENT -> {
-                    switch(ch){
-                        case 'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','q','r','s','t','u','v','w','x','z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Z' -> {
-                            state = State.LET_IDENT;
-                            nextChar();
+                case IDENT -> {
+                    if(Character.isJavaIdentifierPart(ch)){
+                        state = State.IDENT;
+                        value += ch;
+                        nextChar();
+                    } else {
+                        state = State.START;
+                        if(reservedWords.containsKey(value)){
+                            IToken.Kind mapKind = reservedWords.get(value);
+                            return new Token(mapKind, tokenStart, value, line, col-(pos-tokenStart), inputChars);
                         }
-
+                        return new Token(Kind.IDENT, tokenStart, value, line, col-(pos-tokenStart), inputChars);
                     }
                 }
-                case stringLit ->{
+                case STRING_LIT ->{
                     switch(ch){
                         case '\\' ->{
-                        state = State.stringLit;
+                        state = State.STRING_LIT;
                         nextChar();
                         if(ch == 'b' ||ch == 'n' || ch =='r' || ch =='"'|| ch == '\\'|| ch == 't'){
                             nextChar();
@@ -346,7 +364,7 @@ public class Scanner implements IScanner {
                          * return inputChars ONLY UP TO THIS POSITION, otherwise it returns the entire input
                          */
         
-                        return new StringLitToken(tokenStart, pos-tokenStart,line,col, inputChars) ; 
+                        return new StringLitToken(tokenStart, pos-tokenStart, line, col-(pos-tokenStart), inputChars) ; 
                         }
                         case '\n', '\r'  ->{// not allowed thows another wrror // 
                             //could this be a defult? 
@@ -354,7 +372,7 @@ public class Scanner implements IScanner {
                             throw new LexicalException("String not valid");
                     }
                     default ->{
-                        state = State.stringLit;// maybe this is redundant
+                        state = State.STRING_LIT;// maybe this is redundant
                         nextChar();
                     }
                 }

@@ -5,6 +5,7 @@ public class Token implements IToken {
     int pos;
     int length;
     int column;
+    int line;
     String input;
     char[] source;
     SourceLocation location;
@@ -17,17 +18,17 @@ public class Token implements IToken {
         this.source = source;
     }
 
-    // public Token(Kind kind, String input, int line, int column){
-    //     super();
-    //     this.kind = kind;
-    //     this.input = input;
-    //     this.length = line;
-    //     this.column = column;
-    // }
+    public Token(Kind kind, int pos, String input, int line, int column, char[] source){
+        this.kind = kind;
+        this.pos = pos;
+        this.input = input;
+        this.line = line;
+        this.column = column;
+    }
 
     @Override
     public SourceLocation getSourceLocation() {
-        return null;
+        return new SourceLocation(line, column);
     }
 
     @Override
@@ -38,7 +39,9 @@ public class Token implements IToken {
     @Override
     public String getTokenString() {
         // TODO Auto-generated method stub
-        return new String(source, pos, length);
+        String tokenStr = String.valueOf(input);
+        //tokenStr = tokenStr.substring(pos, (pos+length));
+        return tokenStr;
     }
 
 }
