@@ -177,12 +177,14 @@ public class Scanner implements IScanner {
                             return new Token(IToken.Kind.BANG, tokenStart, 1, inputChars);
                         }
                         case '&' -> {
+                            state = State.AND;
                             nextChar();
-                            return new Token(IToken.Kind.BITAND, tokenStart, 1, inputChars);
+                            //return new Token(IToken.Kind.BITAND, tokenStart, 1, inputChars);
                         }
                         case '|' -> {
+                            state = State.OR;
                             nextChar();
-                            return new Token(IToken.Kind.BITOR, tokenStart, 1, inputChars);
+                            //return new Token(IToken.Kind.BITOR, tokenStart, 1, inputChars);
                         }
                         case '+' -> {
                             nextChar();
@@ -190,11 +192,12 @@ public class Scanner implements IScanner {
                         }
                         case '-' -> {
                             nextChar();
-                            return new Token(IToken.Kind.QUESTION, tokenStart, 1, inputChars);
+                            return new Token(IToken.Kind.MINUS, tokenStart, 1, inputChars);
                         }
                         case '*' -> {
+                            state = State.EXPONENT;
                             nextChar();
-                            return new Token(IToken.Kind.TIMES, tokenStart, 1, inputChars);
+                            //return new Token(IToken.Kind.TIMES, tokenStart, 1, inputChars);
                         }
                         case '/' -> {
                             nextChar();
@@ -214,17 +217,17 @@ public class Scanner implements IScanner {
                             nextChar();
                         }
                         case '~' -> {
-                            line++;
-                            col = 1;
-                            pos = 1;
-                            ch = inputChars[pos];
+                            while(ch != '\n'){
+                                nextChar();
+                            }
+                            break;
                         }
                         case '0' -> {
                             nextChar();
                             return new NumLitToken(0, tokenStart, pos - tokenStart, inputChars);
                         }
                         default -> {
-                            if(Character.isJavaIdentifierPart(ch)){
+                            if(ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z' || ch == '_'){
                                 state = State.IDENT;
                                 value += ch;
                                 nextChar();
