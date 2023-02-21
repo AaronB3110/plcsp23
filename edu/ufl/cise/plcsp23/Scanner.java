@@ -227,7 +227,7 @@ public class Scanner implements IScanner {
                             return new NumLitToken(0, tokenStart, pos - tokenStart, inputChars);
                         }
                         default -> {
-                            if(Character.isJavaIdentifierPart(ch)){
+                            if(ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z' || ch == '_'){
                                 state = State.IDENT;
                                 value += ch;
                                 nextChar();
