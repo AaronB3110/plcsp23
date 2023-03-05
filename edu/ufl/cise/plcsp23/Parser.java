@@ -153,6 +153,7 @@ private AST UnaryExpr() throws SyntaxException, LexicalException{
     IToken start = currentToken;
     AST ast;
     if(currentToken.getKind() == Kind.BANG|| currentToken.getKind() == Kind.MINUS|| currentToken.getKind() == Kind.RES_sin|| currentToken.getKind() == Kind.RES_cos|| currentToken.getKind() == Kind.RES_atan){
+        currentToken = scan.next();
         AST rightExpression = UnaryExpr();
         ast = new UnaryExpr(start, start.getKind(), (Expr)rightExpression);
     }
