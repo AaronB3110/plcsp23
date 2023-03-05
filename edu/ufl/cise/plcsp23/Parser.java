@@ -192,7 +192,7 @@ private AST primaryExpression() throws SyntaxException, LexicalException{
         }
     }
    else if(currentToken.getKind() == Kind.RES_rand){
-    currentToken = scan.next();
+    //currentToken = scan.next();
         ast= new RandomExpr(start);
     }
     else if ( currentToken.getKind() == Kind.RES_Z){

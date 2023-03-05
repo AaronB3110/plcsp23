@@ -46,6 +46,7 @@ public class Scanner implements IScanner {
         this.ch = inputChars[0];
 
     }
+    
 
     // Helper function for next char
     void nextChar() {
@@ -329,7 +330,7 @@ public class Scanner implements IScanner {
                     }
                 }
                 case IDENT -> {
-                    if(Character.isJavaIdentifierPart(ch)){
+                    if(Character.isLetterOrDigit(ch)){
                         state = State.IDENT;
                         value += ch;
                         nextChar();
