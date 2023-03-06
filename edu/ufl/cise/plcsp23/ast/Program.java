@@ -10,46 +10,53 @@
 
 package edu.ufl.cise.plcsp23.ast;
 
+import java.util.List;
 import java.util.Objects;
 
 import edu.ufl.cise.plcsp23.IToken;
 import edu.ufl.cise.plcsp23.PLCException;
 
-public class ConditionalExpr extends Expr {
+public class Program extends AST {
 
-	final Expr guard;
-	final Expr trueCase;
-	final Expr falseCase;
+	final Type type;
+	final Ident ident;
+	final List<NameDef> paramList;
+	final Block block;
 
-	public ConditionalExpr(IToken firstToken, Expr guard, Expr trueCase, Expr falseCase) {
+	public Program(IToken firstToken, Type type, Ident ident, List<NameDef> paramList, Block block) {
 		super(firstToken);
-		this.guard = guard;
-		this.trueCase = trueCase;
-		this.falseCase = falseCase;
+		this.type = type;
+		this.ident = ident;
+		this.paramList = paramList;
+		this.block = block;
 	}
 
 	@Override
 	public Object visit(ASTVisitor v, Object arg) throws PLCException {
-		return v.visitConditionalExpr(this, arg);
+		return v.visitProgram(this, arg);
 	}
 
-	public Expr getGuard() {
-		return guard;
+	public Type getType() {
+		return type;
 	}
 
-	public Expr getTrueCase() {
-		return trueCase;
+	public Ident getIdent() {
+		return ident;
 	}
 
-	public Expr getFalseCase() {
-		return falseCase;
+	public List<NameDef> getParamList() {
+		return paramList;
+	}
+
+	public Block getBlock() {
+		return block;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + Objects.hash(falseCase, guard, trueCase);
+		result = prime * result + Objects.hash(block, ident, paramList, type);
 		return result;
 	}
 
@@ -61,14 +68,10 @@ public class ConditionalExpr extends Expr {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		ConditionalExpr other = (ConditionalExpr) obj;
-		return Objects.equals(falseCase, other.falseCase) && Objects.equals(guard, other.guard)
-				&& Objects.equals(trueCase, other.trueCase);
+		Program other = (Program) obj;
+		return Objects.equals(block, other.block) && Objects.equals(ident, other.ident)
+				&& Objects.equals(paramList, other.paramList) && type == other.type;
 	}
 
-	@Override
-	public String toString() {
-		return "ConditionalExpr [guard=" + guard + ", trueCase=" + trueCase + ", falseCase=" + falseCase + "]";
-	}
-
+	
 }

@@ -330,7 +330,7 @@ public class Scanner implements IScanner {
                     }
                 }
                 case IDENT -> {
-                    if(Character.isLetterOrDigit(ch)){
+                    if(Character.isLetterOrDigit(ch)|| ch == '_'){
                         state = State.IDENT;
                         value += ch;
                         nextChar();

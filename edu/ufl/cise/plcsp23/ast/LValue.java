@@ -10,29 +10,42 @@
 
 package edu.ufl.cise.plcsp23.ast;
 
-import edu.ufl.cise.plcsp23.INumLitToken;
 import edu.ufl.cise.plcsp23.IToken;
 import edu.ufl.cise.plcsp23.PLCException;
 
-public class NumLitExpr extends Expr {
-	
-	public NumLitExpr(IToken firstToken) {
+public class LValue extends AST {
+
+	final Ident ident;
+	final PixelSelector pixelSelector;
+	final ColorChannel color;
+
+	public LValue(IToken firstToken, Ident ident, PixelSelector pixelSelector, ColorChannel color) {
 		super(firstToken);
+		this.ident = ident;
+		this.pixelSelector = pixelSelector;
+		this.color = color;
 	}
 
 	@Override
 	public Object visit(ASTVisitor v, Object arg) throws PLCException {
-		return v.visitNumLitExpr(this,arg);
+		return v.visitLValue(this, arg);
 	}
-	
-	public int getValue() {
-		return ((INumLitToken)firstToken).getValue();
+
+	public Ident getIdent() {
+		return ident;
+	}
+
+	public PixelSelector getPixelSelector() {
+		return pixelSelector;
+	}
+
+	public ColorChannel getColor() {
+		return color;
 	}
 
 	@Override
 	public String toString() {
-		return "NumLitExpr [firstToken=" + firstToken + "]";
+		return "LValue [ident=" + ident + ", pixelSelector=" + pixelSelector + ", color=" + color + "]";
 	}
 
-	
 }

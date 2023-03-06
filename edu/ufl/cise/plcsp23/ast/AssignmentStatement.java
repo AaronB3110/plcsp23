@@ -15,48 +15,53 @@ import java.util.Objects;
 import edu.ufl.cise.plcsp23.IToken;
 import edu.ufl.cise.plcsp23.PLCException;
 
-public abstract class AST {
+public class AssignmentStatement extends Statement {
 
-	public final IToken firstToken;
+	final LValue lv;
+	final Expr e;
 
-	public AST(IToken firstToken) {
-		this.firstToken = firstToken;
+	public AssignmentStatement(IToken firstToken, LValue lv, Expr e) {
+		super(firstToken);
+		this.lv = lv;
+		this.e = e;
 	}
 
-	public abstract Object visit(ASTVisitor v, Object arg) throws PLCException;
-
-	public IToken getFirstToken() {
-		return firstToken;
+	@Override
+	public Object visit(ASTVisitor v, Object arg) throws PLCException {
+		return v.visitAssignmentStatement(this, arg);
 	}
 
-	public int getLine() {
-		return firstToken.getSourceLocation().line();
+	public LValue getLv() {
+		return lv;
 	}
 
-	public int getColumn() {
-		return firstToken.getSourceLocation().column();
+	public Expr getE() {
+		return e;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(firstToken);
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + Objects.hash(e, lv);
+		return result;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
+		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		AST other = (AST) obj;
-		return Objects.equals(firstToken, other.firstToken);
+		AssignmentStatement other = (AssignmentStatement) obj;
+		return Objects.equals(e, other.e) && Objects.equals(lv, other.lv);
 	}
 
 	@Override
 	public String toString() {
-		return "AST [" + (firstToken != null ? "firstToken=" + firstToken : "") + "]";
+		return "AssignmentStatement [lv=" + lv + ", e=" + e + "]";
 	}
 
 }
