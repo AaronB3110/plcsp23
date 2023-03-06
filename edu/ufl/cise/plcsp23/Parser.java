@@ -43,38 +43,63 @@ public class Parser implements IParser{
 }
 private AST expression() throws LexicalException, SyntaxException{
     IToken start = currentToken;
-    AST ast = null;
-    ast = condititonal_exxpression();
-    if(ast == null){
+   AST ast;
+    if(currentToken.getKind() == Kind.RES_if){
+        ast = condititonal_exxpression();
+    }
+    else{
         ast = or_expression();
     }
     return ast;
 }
 
-private AST condititonal_exxpression() throws LexicalException, SyntaxException{
+// private AST condititonal_exxpression() throws LexicalException, SyntaxException{
+//     IToken start = currentToken;
+//     AST ast = null;
+//     if(currentToken.getKind() == Kind.RES_if){
+//         AST guard = null;
+//         AST trueCase = null;
+//         AST falseCase = null;
+//         currentToken = scan.next();
+//         guard = expression();
+//          if(currentToken.getKind() == Kind.QUESTION){
+//              currentToken = scan.next(); 
+//               trueCase = expression();
+//               if(currentToken.getKind() == Kind.QUESTION ){
+//                   currentToken = scan.next();
+//                  falseCase = expression();
+//                 //   ast = new ConditionalExpr(start, (Expr)guard, (Expr)trueCase,(Expr) falseCase);
+//               }
+//          }
+    
+//          else{
+//                 throw new SyntaxException("Expected a '?'");
+//          }
+//          ast = new ConditionalExpr(start,(Expr)ast,(Expr)trueCase, (Expr)falseCase);
+//     }
+//     return ast;
+// }
+
+private AST condititonal_exxpression() throws SyntaxException, LexicalException{
     IToken start = currentToken;
     AST ast = null;
     if(currentToken.getKind() == Kind.RES_if){
-        AST guard = null;
-        AST trueCase = null;
-        AST falseCase = null;
         currentToken = scan.next();
-        guard = expression();
-         if(currentToken.getKind() == Kind.QUESTION){
-             currentToken = scan.next(); 
-              trueCase = expression();
-              if(currentToken.getKind() == Kind.QUESTION ){
-                  currentToken = scan.next();
-                 falseCase = expression();
-                  ast = new ConditionalExpr(start, (Expr)guard, (Expr)trueCase,(Expr) falseCase);
-              }
-         }
-         else{
+        AST guard = expression();
+        if(currentToken.getKind() == Kind.QUESTION){
+            currentToken = scan.next();
+            AST trueCase = expression();
+            if(currentToken.getKind() == Kind.QUESTION){
+                currentToken = scan.next();
+                AST falseCase = expression();
+                return new ConditionalExpr(start, (Expr)guard, (Expr)trueCase, (Expr)falseCase);
+            }
+        }
+            else{
                 throw new SyntaxException("Expected a '?'");
-         }
-         ast = new ConditionalExpr(start,(Expr)ast,(Expr)trueCase, (Expr)falseCase);
-    }
-    return ast;
+            }
+        }
+        return ast;
 }
 
 private AST or_expression() throws LexicalException, SyntaxException{
