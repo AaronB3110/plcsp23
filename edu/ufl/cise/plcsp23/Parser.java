@@ -111,6 +111,7 @@ private ArrayList<Declaration> decList() throws PLCException{
 
     while(currentToken.getKind() != Kind.RCURLY && currentToken.getKind() != Kind.RES_write  && currentToken.getKind() != Kind.RES_while && currentToken.getKind() != Kind.IDENT){
         Declaration dec = declaration();
+        currentToken = scan.next();
         decs.add(dec);
         if(currentToken.getKind() == Kind.DOT){
             match(Kind.DOT);
