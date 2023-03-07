@@ -419,7 +419,8 @@ else if(currentToken.getKind() == Kind.RES_r){
  else if(currentToken.getKind() == Kind.LSQUARE){
     ast =  expandePixel();
     }
-else if(match1(Kind.RES_x_cart, Kind.RES_y_cart, Kind.RES_a_polar, Kind.RES_r_polar)){
+
+    else if(currentToken.getKind() == Kind.RES_x_cart || currentToken.getKind() == Kind.RES_y_cart || currentToken.getKind() == Kind.RES_a_polar || currentToken.getKind() == Kind.RES_r_polar){
  ast = pixelFuncExpr();
  }
     else{
@@ -469,7 +470,6 @@ private Statement statement() throws PLCException{
     case RES_while ->{
         currentToken = scan.next();
         AST expr = expression();
-        currentToken = scan.next();
         Block block = block();
         return new WhileStatement(currentToken, (Expr)expr, block);
     }
@@ -479,8 +479,7 @@ private Statement statement() throws PLCException{
 }
 public LValue lvalue() throws PLCException{
     IToken start = currentToken;
-    //add in if statemnt...
-    match(Kind.IDENT);
+   if(match1(Kind.IDENT)){
     Ident ident = new Ident(start);
     PixelSelector pix = null;
     ColorChannel channel = null;
@@ -491,6 +490,11 @@ public LValue lvalue() throws PLCException{
         channel = channel();
         }
     return new LValue(start, ident, pix, channel);
+}
+else{
+    throw(new SyntaxException("invalid token in lvalue"));
+
+}
 }
 
 
@@ -542,4 +546,5 @@ public ColorChannel channel() throws PLCException{
     public AST parse() throws PLCException {
        return program();
     }
-}git push origin develop:master
+
+}
