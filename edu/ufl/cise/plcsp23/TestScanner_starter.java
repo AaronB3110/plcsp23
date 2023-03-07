@@ -141,6 +141,7 @@ class TestScanner_starter {
 				i0
 				  i1  x ~~~2 spaces at beginning and after il
 				y Y
+				rand
 				""";
 
 		IScanner scanner = CompilerComponentFactory.makeScanner(input);
@@ -149,6 +150,7 @@ class TestScanner_starter {
 		checkToken(Kind.RES_x, "x", new SourceLocation(2,7), scanner.next());		
 		checkToken(Kind.RES_y, "y", new SourceLocation(3,1), scanner.next());
 		checkToken(Kind.RES_Y, "Y", new SourceLocation(3,3), scanner.next());
+		checkToken(Kind.RES_rand,"rand", new SourceLocation(4,1), scanner.next());
 		checkEOF(scanner.next());
 	}
 	
