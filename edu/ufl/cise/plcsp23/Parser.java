@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.junit.experimental.theories.Theories;
+import org.junit.jupiter.params.shadow.com.univocity.parsers.csv.CsvFormat;
 
 import edu.ufl.cise.plcsp23.IToken.Kind;
 import edu.ufl.cise.plcsp23.ast.*;
@@ -75,18 +76,31 @@ public class Parser implements IParser{
 }
 private Program program() throws PLCException{
     IToken start = currentToken;
-    if(typeMatch1(Type.IMAGE, Type.PIXEL, Type.INT, Type.STRING, Type.VOID)){
-        Type type = Type.getType(currentToken);
-        match(Kind.IDENT);
-        Ident ident = new Ident(currentToken);
+    // if(typeMatch1(Type.IMAGE, Type.PIXEL, Type.INT, Type.STRING, Type.VOID)){
+        if(Type.getType(currentToken) == Type.IMAGE || Type.getType(currentToken) == Type.PIXEL || Type.getType(currentToken) == Type.INT || Type.getType(currentToken) == Type.STRING || Type.getType(currentToken) == Type.VOID){
+            Type type = Type.getType(start);
+            currentToken = scan.next();
+        AST ident = new Ident(currentToken);
+        if( currentToken.getKind() == Kind.IDENT){
+            match(Kind.IDENT);
+        }
+        else{
+            throw new SyntaxException("Expected IDENT but found " + currentToken.getKind());
+        }
+         if(currentToken.getKind() == Kind.LPAREN){
         match(Kind.LPAREN);
+       }
+       else{
+           throw new SyntaxException("Expected LPAREN but found " + currentToken.getKind());
+         }
+
         ArrayList<NameDef> params = paramList();
         match(Kind.RPAREN);
         Block block = block();
-        return new Program(start, type, ident, params, block);
+        return new Program(start, type, (Ident)ident, params, block);
     }
     else{
-        throw new SyntaxException("Expected one of [IMAGE, PIXEL, INT, STRING, VOID] but found " + currentToken.getKind());
+        throw new SyntaxException("program() Expected one of [A Type]  but found " + currentToken.getKind());
     }
 
 }
@@ -94,12 +108,13 @@ private Program program() throws PLCException{
 private ArrayList<Declaration> decList() throws PLCException{
     IToken start = currentToken;
     ArrayList<Declaration> decs = new ArrayList<Declaration>();
-    Declaration dec = declaration();
-    decs.add(dec);
-    while(currentToken.getKind() == Kind.DOT){
-        match(Kind.DOT);
-        dec = declaration();
+
+    while(currentToken.getKind() != Kind.RCURLY && currentToken.getKind() != Kind.RES_write  && currentToken.getKind() != Kind.RES_while && currentToken.getKind() != Kind.IDENT){
+        Declaration dec = declaration();
         decs.add(dec);
+        if(currentToken.getKind() == Kind.DOT){
+            match(Kind.DOT);
+        }
     }
     return decs;
 }
@@ -118,12 +133,13 @@ private Declaration declaration() throws PLCException{
 private ArrayList<Statement> statementList() throws PLCException{
     IToken start = currentToken;
     ArrayList<Statement> statements = new ArrayList<Statement>();
-    Statement statement = statement();
-    statements.add(statement);
-    while(currentToken.getKind() == Kind.DOT){
-        match(Kind.DOT);
-        statement = statement();
+
+    while(currentToken.getKind() != Kind.RCURLY && currentToken.getKind() != Kind.RPAREN){
+        Statement statement = statement();
         statements.add(statement);
+        if(currentToken.getKind() == Kind.DOT){
+            match(Kind.DOT);
+        }
     }
     return statements;
 }
@@ -132,26 +148,32 @@ private ArrayList<NameDef> paramList() throws PLCException{
     IToken start = currentToken;
     ArrayList<NameDef> params = new ArrayList<NameDef>();
     NameDef name = null;
-    if(typeMatch1(Type.IMAGE, Type.PIXEL, Type.INT, Type.STRING, Type.VOID)){
+   
+   if(currentToken.getKind() != Kind.RPAREN){
+        name = nameDef();
+        params.add(name);
+   
+   while(currentToken.getKind() != Kind.RCURLY && currentToken.getKind() != Kind.RES_while && currentToken.getKind() != Kind.IDENT && currentToken.getKind() != Kind.RPAREN){
+        if( currentToken.getKind() == Kind.COMMA){
+         match(Kind.COMMA);
         name = nameDef();
         params.add(name);
     }
-    while(currentToken.getKind() == Kind.COMMA){
-        name = nameDef();
-        params.add(name);   
-    }
+}
+ }
     return params;
 }
 
 
 private NameDef nameDef() throws PLCException{
     IToken start = currentToken;
-    typeMatch(Type.IMAGE, Type.PIXEL, Type.INT, Type.STRING, Type.VOID);
     Dimension dim = null;
+    Ident id = null;
+    typeMatch(Type.IMAGE, Type.PIXEL, Type.INT, Type.STRING, Type.VOID);
     if(currentToken.getKind() == Kind.LSQUARE){
         dim = dimension();
     }
-    Ident id = new Ident(currentToken);
+    id = new Ident(currentToken);
     match(Kind.IDENT);
 
     return new NameDef(start, Type.getType(start), dim,id);
@@ -159,8 +181,13 @@ private NameDef nameDef() throws PLCException{
 
 private Type type() throws PLCException{
     IToken start = currentToken;
-    match(Kind.RES_image, Kind.RES_pixel, Kind.RES_int,Kind.RES_string, Kind.RES_void); 
-    return Type.getType(start);
+    if(match1(Kind.RES_image, Kind.RES_pixel, Kind.RES_int,Kind.RES_string, Kind.RES_void)){
+        return Type.getType(start);
+    } 
+    else{
+        throw new SyntaxException("Expected one of [RES_image, RES_pixel, RES_int, RES_string, RES_void] but found " + currentToken.getKind());
+    }
+    
 }
 
 private Dimension dimension() throws PLCException{
@@ -274,7 +301,7 @@ private AST power_expression() throws PLCException{
     IToken start = currentToken;
     AST ast = additive_expression();
 
-    while( currentToken.getKind() == Kind.EXP){
+    if(currentToken.getKind() == Kind.EXP){
         currentToken = scan.next();
         AST rightExpression = power_expression();
         ast = new BinaryExpr(start,(Expr) ast, Kind.EXP,(Expr) rightExpression);
@@ -306,7 +333,7 @@ private AST multiplicative_expression() throws PLCException{
     }
     return ast;
 }
-private UnaryExprPostfix unaryExprPostFix() throws PLCException{
+private AST unaryExprPostFix() throws PLCException{
     IToken start = currentToken;
     AST ast = primaryExpression();
     PixelSelector pix = null;
@@ -316,6 +343,9 @@ private UnaryExprPostfix unaryExprPostFix() throws PLCException{
         if(currentToken.getKind() == Kind.COLON){
         color = channel();
         }
+    }
+    if(pix == null){
+        return ast;
     }
     return new UnaryExprPostfix(start, (Expr)ast, pix, color);
 }
@@ -386,14 +416,14 @@ else if(currentToken.getKind() == Kind.RES_r){
     currentToken = scan.next();
     ast = new PredeclaredVarExpr(start);
 }
- else if(match1(Kind.LPAREN)){
- ast = expandePixel();
+ else if(currentToken.getKind() == Kind.LSQUARE){
+    ast =  expandePixel();
     }
 else if(match1(Kind.RES_x_cart, Kind.RES_y_cart, Kind.RES_a_polar, Kind.RES_r_polar)){
  ast = pixelFuncExpr();
  }
     else{
-        throw(new SyntaxException("invalid token in primary expression"));
+        throw(new SyntaxException("invalid token in primary expression. character is: " + currentToken.getKind() + " " ));
     }
     return ast;
 }   
@@ -415,6 +445,8 @@ private ExpandedPixelExpr expandePixel() throws PLCException{
 
 private PixelFuncExpr pixelFuncExpr() throws PLCException{
     IToken start = currentToken;
+
+    //add exception 
     match(Kind.RES_x_cart, Kind.RES_y_cart, Kind.RES_a_polar, Kind.RES_r_polar);
     PixelSelector pix = pixs();
     return new PixelFuncExpr(start, start.getKind(), pix);
@@ -447,17 +479,17 @@ private Statement statement() throws PLCException{
 }
 public LValue lvalue() throws PLCException{
     IToken start = currentToken;
-    
+    //add in if statemnt...
     match(Kind.IDENT);
     Ident ident = new Ident(start);
     PixelSelector pix = null;
     ColorChannel channel = null;
     if(currentToken.getKind() == Kind.LSQUARE){
         pix = pixs();
+    }
         if(currentToken.getKind() == Kind.COLON){
         channel = channel();
         }
-    }
     return new LValue(start, ident, pix, channel);
 }
 
@@ -477,6 +509,8 @@ public Block block() throws PLCException{
     match(Kind.LCURLY);
     ArrayList<Declaration> decls = new ArrayList<Declaration>();
     ArrayList<Statement> stmts = new ArrayList<Statement>();
+    decls = decList();
+    stmts = statementList();
     match(Kind.RCURLY);
     return new Block(start, decls, stmts);
 }   
@@ -500,12 +534,12 @@ public ColorChannel channel() throws PLCException{
     }
     
     else{
-        throw new PLCException("invalid token in channel");
+        throw new PLCException("invalid token in channel" + currentToken.getKind());
     }
 }
 
     @Override
     public AST parse() throws PLCException {
-       return expression();
+       return program();
     }
-}
+}git push origin develop:master
