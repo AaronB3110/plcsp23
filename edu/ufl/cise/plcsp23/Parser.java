@@ -73,36 +73,35 @@ public class Parser implements IParser{
     Parser(IScanner scan) throws LexicalException{
         this.scan = scan;
         currentToken = scan.next();
-    }
-    
+}
 private Program program() throws PLCException{
     IToken start = currentToken;
     // if(typeMatch1(Type.IMAGE, Type.PIXEL, Type.INT, Type.STRING, Type.VOID)){
         if(Type.getType(currentToken) == Type.IMAGE || Type.getType(currentToken) == Type.PIXEL || Type.getType(currentToken) == Type.INT || Type.getType(currentToken) == Type.STRING || Type.getType(currentToken) == Type.VOID){
             Type type = Type.getType(start);
             currentToken = scan.next();
-            AST ident = new Ident(currentToken);
-            if( currentToken.getKind() == Kind.IDENT){
-                match(Kind.IDENT);
-            }
-            else{
-                throw new SyntaxException("Expected IDENT but found " + currentToken.getKind());
-            }
-            if(currentToken.getKind() == Kind.LPAREN){
-                match(Kind.LPAREN);
-            }
-            else{
-                throw new SyntaxException("Expected LPAREN but found " + currentToken.getKind());
-            }
-
-            ArrayList<NameDef> params = paramList();
-            match(Kind.RPAREN);
-            Block block = block();
-            return new Program(start, type, (Ident)ident, params, block);
+        AST ident = new Ident(currentToken);
+        if( currentToken.getKind() == Kind.IDENT){
+            match(Kind.IDENT);
         }
         else{
-            throw new SyntaxException("program() Expected one of [A Type]  but found " + currentToken.getKind());
+            throw new SyntaxException("Expected IDENT but found " + currentToken.getKind());
         }
+         if(currentToken.getKind() == Kind.LPAREN){
+        match(Kind.LPAREN);
+       }
+       else{
+           throw new SyntaxException("Expected LPAREN but found " + currentToken.getKind());
+         }
+
+        ArrayList<NameDef> params = paramList();
+        match(Kind.RPAREN);
+        Block block = block();
+        return new Program(start, type, (Ident)ident, params, block);
+    }
+    else{
+        throw new SyntaxException("program() Expected one of [A Type]  but found " + currentToken.getKind());
+    }
 
 }
 
@@ -112,6 +111,7 @@ private ArrayList<Declaration> decList() throws PLCException{
 
     while(currentToken.getKind() != Kind.RCURLY && currentToken.getKind() != Kind.RES_write  && currentToken.getKind() != Kind.RES_while && currentToken.getKind() != Kind.IDENT){
         Declaration dec = declaration();
+        currentToken = scan.next();
         decs.add(dec);
         if(currentToken.getKind() == Kind.DOT){
             match(Kind.DOT);
@@ -420,7 +420,8 @@ else if(currentToken.getKind() == Kind.RES_r){
  else if(currentToken.getKind() == Kind.LSQUARE){
     ast =  expandePixel();
     }
-else if(match1(Kind.RES_x_cart, Kind.RES_y_cart, Kind.RES_a_polar, Kind.RES_r_polar)){
+
+    else if(currentToken.getKind() == Kind.RES_x_cart || currentToken.getKind() == Kind.RES_y_cart || currentToken.getKind() == Kind.RES_a_polar || currentToken.getKind() == Kind.RES_r_polar){
  ast = pixelFuncExpr();
  }
     else{
@@ -448,13 +449,9 @@ private PixelFuncExpr pixelFuncExpr() throws PLCException{
     IToken start = currentToken;
 
     //add exception 
-    if (match1(Kind.RES_x_cart, Kind.RES_y_cart, Kind.RES_a_polar, Kind.RES_r_polar)){
-        PixelSelector pix = pixs();
-        return new PixelFuncExpr(start, start.getKind(), pix);
-    } else {
-        throw new SyntaxException("Invalid token");
-    }
-
+    match(Kind.RES_x_cart, Kind.RES_y_cart, Kind.RES_a_polar, Kind.RES_r_polar);
+    PixelSelector pix = pixs();
+    return new PixelFuncExpr(start, start.getKind(), pix);
 }
 
 private Statement statement() throws PLCException{
@@ -474,7 +471,6 @@ private Statement statement() throws PLCException{
     case RES_while ->{
         currentToken = scan.next();
         AST expr = expression();
-        currentToken = scan.next();
         Block block = block();
         return new WhileStatement(currentToken, (Expr)expr, block);
     }
@@ -484,22 +480,22 @@ private Statement statement() throws PLCException{
 }
 public LValue lvalue() throws PLCException{
     IToken start = currentToken;
-    //add in if statemnt...
-    if(match1(Kind.IDENT)){
-        Ident ident = new Ident(start);
-        PixelSelector pix = null;
-        ColorChannel channel = null;
-        if(currentToken.getKind() == Kind.LSQUARE){
-            pix = pixs();
-        }
-            if(currentToken.getKind() == Kind.COLON){
-            channel = channel();
-            }
-        return new LValue(start, ident, pix, channel);
-    } else {
-        throw new SyntaxException("Invalid token");
+   if(match1(Kind.IDENT)){
+    Ident ident = new Ident(start);
+    PixelSelector pix = null;
+    ColorChannel channel = null;
+    if(currentToken.getKind() == Kind.LSQUARE){
+        pix = pixs();
     }
-    
+        if(currentToken.getKind() == Kind.COLON){
+        channel = channel();
+        }
+    return new LValue(start, ident, pix, channel);
+}
+else{
+    throw(new SyntaxException("invalid token in lvalue"));
+
+}
 }
 
 
@@ -551,4 +547,5 @@ public ColorChannel channel() throws PLCException{
     public AST parse() throws PLCException {
        return program();
     }
+
 }
