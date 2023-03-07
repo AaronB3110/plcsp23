@@ -10,29 +10,36 @@
 
 package edu.ufl.cise.plcsp23.ast;
 
-import edu.ufl.cise.plcsp23.INumLitToken;
 import edu.ufl.cise.plcsp23.IToken;
 import edu.ufl.cise.plcsp23.PLCException;
 
-public class NumLitExpr extends Expr {
-	
-	public NumLitExpr(IToken firstToken) {
+public class Declaration extends AST {
+
+	final NameDef nameDef;
+	final Expr initializer;
+
+	public Declaration(IToken firstToken, NameDef nameDef, Expr initializer) {
 		super(firstToken);
+		this.nameDef = nameDef;
+		this.initializer = initializer;
 	}
 
 	@Override
 	public Object visit(ASTVisitor v, Object arg) throws PLCException {
-		return v.visitNumLitExpr(this,arg);
+		return v.visitDeclaration(this, arg);
 	}
-	
-	public int getValue() {
-		return ((INumLitToken)firstToken).getValue();
+
+	public NameDef getNameDef() {
+		return nameDef;
+	}
+
+	public Expr getInitializer() {
+		return initializer;
 	}
 
 	@Override
 	public String toString() {
-		return "NumLitExpr [firstToken=" + firstToken + "]";
+		return "Declaration [nameDef=" + nameDef + ", initializer=" + initializer + "]";
 	}
 
-	
 }

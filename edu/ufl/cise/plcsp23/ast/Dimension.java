@@ -10,29 +10,37 @@
 
 package edu.ufl.cise.plcsp23.ast;
 
-import edu.ufl.cise.plcsp23.INumLitToken;
 import edu.ufl.cise.plcsp23.IToken;
 import edu.ufl.cise.plcsp23.PLCException;
 
-public class NumLitExpr extends Expr {
-	
-	public NumLitExpr(IToken firstToken) {
+public class Dimension extends AST {
+
+	final Expr width;
+	final Expr height;
+
+	public Dimension(IToken firstToken, Expr width, Expr height) {
 		super(firstToken);
+		this.width = width;
+		this.height = height;
 	}
 
 	@Override
 	public Object visit(ASTVisitor v, Object arg) throws PLCException {
-		return v.visitNumLitExpr(this,arg);
+		return v.visitDimension(this, arg);
 	}
-	
-	public int getValue() {
-		return ((INumLitToken)firstToken).getValue();
+
+
+	public Expr getWidth() {
+		return width;
+	}
+
+	public Expr getHeight() {
+		return height;
 	}
 
 	@Override
 	public String toString() {
-		return "NumLitExpr [firstToken=" + firstToken + "]";
+		return "Dimension [width=" + width + ", height=" + height + "]";
 	}
 
-	
 }
