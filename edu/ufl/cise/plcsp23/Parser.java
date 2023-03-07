@@ -73,35 +73,36 @@ public class Parser implements IParser{
     Parser(IScanner scan) throws LexicalException{
         this.scan = scan;
         currentToken = scan.next();
-}
+    }
+    
 private Program program() throws PLCException{
     IToken start = currentToken;
     // if(typeMatch1(Type.IMAGE, Type.PIXEL, Type.INT, Type.STRING, Type.VOID)){
         if(Type.getType(currentToken) == Type.IMAGE || Type.getType(currentToken) == Type.PIXEL || Type.getType(currentToken) == Type.INT || Type.getType(currentToken) == Type.STRING || Type.getType(currentToken) == Type.VOID){
             Type type = Type.getType(start);
             currentToken = scan.next();
-        AST ident = new Ident(currentToken);
-        if( currentToken.getKind() == Kind.IDENT){
-            match(Kind.IDENT);
+            AST ident = new Ident(currentToken);
+            if( currentToken.getKind() == Kind.IDENT){
+                match(Kind.IDENT);
+            }
+            else{
+                throw new SyntaxException("Expected IDENT but found " + currentToken.getKind());
+            }
+            if(currentToken.getKind() == Kind.LPAREN){
+                match(Kind.LPAREN);
+            }
+            else{
+                throw new SyntaxException("Expected LPAREN but found " + currentToken.getKind());
+            }
+
+            ArrayList<NameDef> params = paramList();
+            match(Kind.RPAREN);
+            Block block = block();
+            return new Program(start, type, (Ident)ident, params, block);
         }
         else{
-            throw new SyntaxException("Expected IDENT but found " + currentToken.getKind());
+            throw new SyntaxException("program() Expected one of [A Type]  but found " + currentToken.getKind());
         }
-         if(currentToken.getKind() == Kind.LPAREN){
-        match(Kind.LPAREN);
-       }
-       else{
-           throw new SyntaxException("Expected LPAREN but found " + currentToken.getKind());
-         }
-
-        ArrayList<NameDef> params = paramList();
-        match(Kind.RPAREN);
-        Block block = block();
-        return new Program(start, type, (Ident)ident, params, block);
-    }
-    else{
-        throw new SyntaxException("program() Expected one of [A Type]  but found " + currentToken.getKind());
-    }
 
 }
 
@@ -447,9 +448,13 @@ private PixelFuncExpr pixelFuncExpr() throws PLCException{
     IToken start = currentToken;
 
     //add exception 
-    match(Kind.RES_x_cart, Kind.RES_y_cart, Kind.RES_a_polar, Kind.RES_r_polar);
-    PixelSelector pix = pixs();
-    return new PixelFuncExpr(start, start.getKind(), pix);
+    if (match1(Kind.RES_x_cart, Kind.RES_y_cart, Kind.RES_a_polar, Kind.RES_r_polar)){
+        PixelSelector pix = pixs();
+        return new PixelFuncExpr(start, start.getKind(), pix);
+    } else {
+        throw new SyntaxException("Invalid token");
+    }
+
 }
 
 private Statement statement() throws PLCException{
@@ -480,17 +485,21 @@ private Statement statement() throws PLCException{
 public LValue lvalue() throws PLCException{
     IToken start = currentToken;
     //add in if statemnt...
-    match(Kind.IDENT);
-    Ident ident = new Ident(start);
-    PixelSelector pix = null;
-    ColorChannel channel = null;
-    if(currentToken.getKind() == Kind.LSQUARE){
-        pix = pixs();
-    }
-        if(currentToken.getKind() == Kind.COLON){
-        channel = channel();
+    if(match1(Kind.IDENT)){
+        Ident ident = new Ident(start);
+        PixelSelector pix = null;
+        ColorChannel channel = null;
+        if(currentToken.getKind() == Kind.LSQUARE){
+            pix = pixs();
         }
-    return new LValue(start, ident, pix, channel);
+            if(currentToken.getKind() == Kind.COLON){
+            channel = channel();
+            }
+        return new LValue(start, ident, pix, channel);
+    } else {
+        throw new SyntaxException("Invalid token");
+    }
+    
 }
 
 
@@ -542,4 +551,4 @@ public ColorChannel channel() throws PLCException{
     public AST parse() throws PLCException {
        return program();
     }
-}git push origin develop:master
+}
